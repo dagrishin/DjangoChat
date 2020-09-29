@@ -1,0 +1,20 @@
+#chat-items {
+    height: 500px;
+    overflow-y: scroll;
+  padding: 20px;
+}
+.toast{
+  opacity: 1 !important;
+  min-width: 400px !important;
+}
+
+.avatar{
+        width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto;
+    -o-object-fit: cover;
+    object-fit: cover;
+    vertical-align: middle;
+}

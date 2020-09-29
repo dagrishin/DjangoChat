@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+<h2 id="{{object.id}}">
+    {% if object.title %}
+    {{object.title}}
+    {% else %}
+    {% for cont in object.participants.all %}
+    {% if cont.user != request.user %}
+    {{ cont.user.username }}
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+</h2>
+<a class="btn btn-primary btn-block" href="{% url 'chat:update_room' object.id %}">Редактировать учасников</a>
+<div class="form-group">
+            <label for="exampleFormControlSelect1">Учасники данной комнаты:</label>
+            <select class="form-control" id="exampleFormControlSelect1">
+                {% for user in chat.participants.all %}
+
+                <option>{{user}}</option>
+
+                {% endfor %}
+            </select>
+        </div>
+<div class="row">
+    <div class="col-auto">
+        <div class="form-group">
+            <a class="btn btn-primary btn-block" href="{% url 'chat:create_room' %}">Создать комнату</a>
+        </div>
+    <h3>Контакты</h3>
+        {% for chat in chats %}
+            {% if chat.title %}
+    <a class="btn btn-primary btn-block" href="{% url 'chat:room' chat.id %}">{{chat.title}}</a>
+    {% else %}
+    {% for cont in chat.participants.all %}
+    {% if cont.user != request.user %}
+        <a class="btn btn-primary btn-block" href="{% url 'chat:room' chat.id %}">{{ cont.user.username }}</a>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+        {% endfor %}
+    </div>
+    <div class="col-sm">
+<div class="bg-light  justify-center" id='chat-items' name="{{request.user.username}}">
+
+    {% for mess in object.messages.all %}
+    <div class="d-flex
+        {% if mess.contact.user == request.user %}
+        justify-content-end
+
+        {% else %}
+        justify-content-start
+        {% endif %}
+        mb-4">
+    <div  class="toast
+        {% if mess.contact.user == request.user %}
+
+        bg-primary
+        {% else %}
+        bg-success
+        {% endif %}
+
+        " role="alert" aria-live="assertive" aria-atomic="true" >
+        <div class="toast-header">
+            <strong class="mr-auto">{{ mess.contact }}</strong>
+            <small>{{mess.timestamp}}</small>
+        </div>
+        <div name="{{mess.contact}}" id="{{ mess.id }}" class="toast-body text-white">
+            {{ mess.content }}
+        </div>
+    </div>
+    </div>
+    {% endfor %}
+</div>
+<form id='form' method='POST'> {% csrf_token %}
+    {{form.as_p }}
+    <input type='submit' class='btn btn-primary'/>
+</form>
+</div>
+
+
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js"></script>
+
+<script>
+    // websocket scripts
+    var loc = window.location;
+    var formData = $("#form")
+    var msgInput = $("#id_message")
+    var chatHolder = $("#chat-items")
+    var userMessage = $("#chat-items").attr("name")
+    // var chatId = $("h3").attr("id")
+    chatHolder.scrollTop(50*chatHolder.height());
+    var wsStart = 'ws://';
+    if (loc.protocol == 'https:') {
+        wsStart = 'wss://'
+    }
+    var endpoint = wsStart + loc.host + loc.pathname;
+    var socket = new ReconnectingWebSocket(endpoint);
+    socket.onmessage = function (e) {
+        // console.log(io.socket)
+        console.log("message", e)
+        var chatDataMsg = JSON.parse(e.data);
+
+        if ($('.toast-body[id="' + chatDataMsg.id + '"]').length) {
+            $('.toast-body[id="' + chatDataMsg.id + '"]').text(chatDataMsg.message)
+        } else {
+            var now = new Date()
+            var dataSend = now.getMonth() + '.' + now.getDate() + '.' + now.getFullYear() + ', ' + now.getHours() + ':' + now.getMinutes();
+            if (userMessage == chatDataMsg.username) {
+                var styleBlock = 'justify-content-end'
+                var styleColor = 'bg-primary'
+
+            }
+            else {
+                var styleBlock = 'justify-content-start'
+                var styleColor = 'bg-success'
+            }
+            var divMessage = '<div class="d-flex mb-4 '+styleBlock+'"><div  class="toast '+ styleColor +'" role="alert" aria-live="assertive" aria-atomic="true" >\n' +
+                '        <div class="toast-header">\n' +
+                '            <strong class="mr-auto">'+chatDataMsg.username+'</strong>\n' +
+                '            <small>'+ dataSend +'</small>\n' +
+                '        </div>\n' +
+                '        <div name="'+ chatDataMsg.username +'" id="' + chatDataMsg.id + '" class="toast-body  text-white">\n' +
+                '            '+ chatDataMsg.message +'\n' +
+                '        </div>\n' +
+                '    </div></div>'
+            chatHolder.append(divMessage)
+            chatHolder.scrollTop(50*chatHolder.height());
+            $('.toast-body').each((index, el) => {
+            $(el).click((e) => {
+                console.log("gfgfg", $(el).attr('id'))
+                if (userMessage == $(el).attr('name')) {
+                    var finalData = {
+                        'message': 'hello',
+                        'id': $(el).attr('id')
+                    }
+
+                    socket.send(JSON.stringify(finalData))
+                }
+
+            })
+        })
+        }
+
+    };
+    socket.onopen = function (e) {
+        console.log("open", e)
+    };
+
+    socket.onerror = function (e) {
+        console.log("error", e)
+    };
+    socket.onclose = function (e) {
+        console.log("close", e)
+
+    };
+    formData.submit(function (event) {
+            event.preventDefault();
+            var msgText = msgInput.val();
+            var finalData = {
+                'message': msgText,
+                'id': ''
+            };
+            console.log('SEND');
+            socket.send(JSON.stringify(finalData));
+            formData[0].reset()
+        });
+
+
+    // $('.toast-body').each((index, el) => {
+    //         $(el).click((e) => {
+    //             console.log("gfgfg", $(el).attr('id'))
+    //             if (userMessage == $(el).attr('name')) {
+    //                 var finalData = {
+    //                     'message': 'hello',
+    //                     'id': $(el).attr('id')
+    //                 }
+    //
+    //                 socket.send(JSON.stringify(finalData))
+    //             }
+    //
+    //         })
+    //     })
+</script>
+{% endblock %}

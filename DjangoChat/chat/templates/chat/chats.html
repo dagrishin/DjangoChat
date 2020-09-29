@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <div class="row">
+    <div class="col">
+        <a class="btn btn-primary btn-block" href="{% url 'chat:create_room' %}">Создать комнату</a>
+    <h3>Чаты</h3>
+        {% for chat in chats %}
+            {% if chat.title %}
+    <a class="btn btn-primary btn-block" href="{% url 'chat:room' chat.id %}">{{chat.title}}</a>
+    {% else %}
+    {% for cont in chat.participants.all %}
+    {% if cont.user != request.user %}
+        <a class="btn btn-primary btn-block" href="{% url 'chat:room' chat.id %}">{{ cont.user.username }}</a>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+        {% endfor %}
+    </div>
+    </div>
+{% endblock %}

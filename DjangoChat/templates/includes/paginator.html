@@ -1,0 +1,68 @@
+{% load i18n %}
+<nav aria-label="Page navigation example"></nav>
+
+    {% with request.get_full_path as querystring %}
+        <ul class="pagination">
+            <!-- Previous page section -->
+            {% if object_list.has_previous %}
+
+                {% if 'interests' in querystring %}
+                    {% if 'page' in querystring %}
+
+                        <li class="page-item {% if object_list.number == page %}active{% endif %}">
+                            <a class="page-link" href="{{ querystring|slice:":-7" }}&page={{ object_list.previous_page_number }}">{% trans 'Prev' %}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item {% if object_list.number == page %}active{% endif %}">
+                            <a class="page-link" href="{{ querystring }}&page={{ object_list.previous_page_number }}">{% trans 'Prev' %}</a>
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li class="page-item {% if object_list.number == page %}active{% endif %}">
+                        <a class="page-link" href="?page={{ object_list.previous_page_number }}">{% trans 'Prev' %}</a>
+                    </li>
+                {% endif %}
+            {% endif %}
+
+            <!-- All object_list section -->
+            {% for page in object_list.paginator.page_range %}
+                {% if 'interests' in querystring %}
+                    {% if 'page' in querystring %}
+                        <li class="page-item {% if object_list.number == page %}active{% endif %}">
+                            <a class="page-link" href="{{ querystring|slice:":-7" }}&page={{ page }}">{{ page }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item {% if object_list.number == page %}active{% endif %}">
+                            <a class="page-link" href="{{ querystring }}&page={{ page }}">{{ page }}</a>
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li class="page-item {% if object_list.number == page %}active{% endif %}">
+                        <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Next page section -->
+            {% if object_list.has_next %}
+                {% if 'stack' in querystring %}
+                    {% if 'page' in querystring %}
+                        <li class="page-item {% if object_list.number == page %}active{% endif %}">
+                            <a class="page-link" href="{{ querystring|slice:":-7" }}&page={{ object_list.next_page_number }}">{% trans 'Next' %}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item {% if object_list.number == page %}active{% endif %}">
+                            <a class="page-link" href="{{ querystring }}&page={{ object_list.next_page_number }}">{% trans 'Next' %}</a>
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li class="page-item {% if object_list.number == page %}active{% endif %}">
+                        <a class="page-link" href="?page={{ object_list.next_page_number }}">{% trans 'Next' %}</a>
+                    </li>
+                {% endif %}
+            {% endif %}
+
+        </ul>
+    {% endwith %}
+
+</nav>

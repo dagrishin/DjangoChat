@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Chat</title>
+    {% include 'css.html' %}
+</head>
+<body>
+
+
+
+<div class='container'>
+
+    <nav class="nav nav-pills nav-fill pt-3">
+        {% if request.user.id %}
+            <a class="nav-item nav-link active" href="{% url 'chat:all' %}">My Chats</a>
+            <a class="nav-item nav-link" href="{% url 'auth:logout' %}">Sing out</a>
+            <a class="nav-item nav-link" href="{% url 'auth:search' %}">Search friends</a>
+            <a href="{% url 'auth:profile' request.user.id %}">
+
+            {% if request.user.avatar %}
+                <img class="avatar" src="{{ request.user.avatar.url }}"></a>
+            {% else %}
+                <img class="avatar" src="{% static 'img/anonymous.png' %}"></a>
+            {% endif %}
+        {% else %}
+            <a class="nav-item nav-link" href="{% url 'auth:login' %}">Sing in</a>
+            <a class="nav-item nav-link" href="{% url 'auth:registration' %}">Sing up</a>
+        {% endif %}
+    </nav>
+    {% if messages %}
+                {% include 'includes/messages.html' %}
+            {% endif %}
+    <div class='row border-bottom my-3 py-3'>
+        <div class='col'>
+            <h1 class='p-0 m-0'>{% block heading %}Chat{% endblock %}</h1>
+        </div>
+    </div>
+{% block main %}
+{% endblock %}
+</div>
+
+
+{% include 'js.html' %}
+{% block script %}
+{% endblock %}
+
+</body>
+</html>

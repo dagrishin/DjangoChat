@@ -1,0 +1,18 @@
+{% extends  'base.html' %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% block main %}
+
+<div class="row">
+    <div class="card-body">
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form|crispy }}
+
+            <button type="submit" class="btn btn-primary btn-block">{% trans 'Registration' %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

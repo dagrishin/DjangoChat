@@ -1,0 +1,59 @@
+{% extends  'base.html' %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% block heading %}Профиль {{object}}{% endblock %}
+{% block main %}
+{% if object.id != request.user.id %}
+    <div class="row">
+        <div class="deal">
+            <form method="post" action="{% url 'auth:deal' object.id %}">
+                {% csrf_token %}
+                {% if button_style == 'add' %}
+                    <button class="btn btn-danger" type="submit" name="add" value="add">Отправить заявку в друзья</button>
+                {% endif %}
+                {% if button_style == 'confirm' %}
+                    <button class="btn btn-danger" type="submit" name="confirm" value="confirm">Подтвердить дружбу</button>
+                {% endif %}
+            </form>
+        </div>
+        <div class="contact">
+            {% if contact_view %}
+                <p>Вы друзья</p>
+            {% else %}
+                <p>Дождитесь подтверждения дружбы</p>
+            {% endif %}
+        </div>
+    </div>
+{% else %}
+    <div class="card-body">
+        {{ form.media.css }}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary btn-block">{% trans 'Update' %}</button>
+        </form>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        {{ form.media.js }}
+    </div>
+    <div class="card-body">
+        {% if user_bids %}
+            <h2>Заявки в друзья:</h2>
+            {% for bid in user_bids %}
+                <a href="{% url 'auth:profile' bid.user.id %}">{{ bid.user }}</a>
+                <form method="post" action="{% url 'auth:deal' bid.user.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-danger" type="submit" name="confirm" value="confirm">Подтвердить</button>
+                </form>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="card-body">
+    {% if friends %}
+        <h2>Друзья:</h2>
+            {% for user in friends %}
+                <a href="{% url 'auth:profile' user.id %}">{{ user }}</a>
+            {% endfor %}
+    {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

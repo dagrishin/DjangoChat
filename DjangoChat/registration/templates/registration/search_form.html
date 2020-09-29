@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block main %}
+{{ form.media.css }}
+<style type="text/css">
+    select {
+      width: 400px;
+    }
+</style>
+{% block heading %}Поиск друзей по интересам{% endblock %}
+<form method="get" action="">
+    {{ form }}
+    <button class="btn btn-primary" type="submit">{% trans 'ПОИСК' %}</button>
+</form>
+
+<div class="user_list">
+    <table class="table table-striped">
+        <thead>
+    <tr>
+
+      <th scope="col">Avatar</th>
+      <th scope="col">Nick Name</th>
+      <th scope="col">Interests</th>
+    </tr>
+  </thead>
+        <tbody>
+    {% for object in object_list %}
+
+
+
+    <tr>
+
+      <td>{% if object.user.avatar %}
+                <img class="avatar" src="{{ object.user.avatar.url }}"></a>
+            {% else %}
+                <img class="avatar" src="{% static 'img/anonymous.png' %}"></a>
+            {% endif %}</td>
+      <td><a href="{% url 'auth:profile' object.user.id %}">{{ object.user }}</a></td>
+      <td>{% if object.interests.all %}
+        <p>Интересы:</p>
+        {% for interest in object.interests.all %}
+    <a href="{% url 'auth:search' %}?interests={{ interest.id }}">{{ interest.name }} </a>
+        {% endfor %}
+        {% endif %}</td>
+    </tr>
+
+
+
+
+
+
+
+    {% endfor %}
+    </tbody>
+</table>
+    {% if object_list %}
+        {% include 'includes/paginator.html' %}
+    {% else %}
+        <p>Ничего не найдено</p>
+    {% endif %}
+</div>
+
+<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+<script type="text/javascript">
+  window.onerror = function (msg) {
+    $("body").attr("JSError", msg);
+  }
+  if(!!window.performance && window.performance.navigation.type == 2) {
+    window.location.reload();
+    }
+</script>
+{{ form.media.js }}
+{% endblock main %}
